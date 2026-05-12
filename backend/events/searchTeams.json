@@ -1,0 +1,14 @@
+{
+  "httpMethod": "GET",
+  "path": "/teams/search",
+  "queryStringParameters": { "q": "Arsenal" },
+  "pathParameters": null,
+  "headers": {},
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "body": null,
+  "isBase64Encoded": false,
+  "resource": "",
+  "stageVariables": null,
+  "requestContext": {}
+}

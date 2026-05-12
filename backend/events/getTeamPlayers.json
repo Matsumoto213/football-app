@@ -1,0 +1,14 @@
+{
+  "httpMethod": "GET",
+  "path": "/teams/42/players",
+  "queryStringParameters": null,
+  "pathParameters": { "teamId": "42" },
+  "headers": {},
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "body": null,
+  "isBase64Encoded": false,
+  "resource": "",
+  "stageVariables": null,
+  "requestContext": {}
+}

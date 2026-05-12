@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Football App Backend
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 256
+  Api:
+    Cors:
+      AllowMethods: "'GET,OPTIONS'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  ApiFootballKey:
+    Type: String
+    NoEcho: true
+    Description: API-FOOTBALL API Key
+
+Resources:
+  SearchTeamsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/searchTeams.ts
+    Properties:
+      CodeUri: ./
+      Handler: searchTeams.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        SearchTeams:
+          Type: Api
+          Properties:
+            Path: /teams/search
+            Method: GET
+
+  GetTeamFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getTeam.ts
+    Properties:
+      CodeUri: ./
+      Handler: getTeam.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetTeam:
+          Type: Api
+          Properties:
+            Path: /teams/{teamId}
+            Method: GET
+
+  GetFixturesFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getFixtures.ts
+    Properties:
+      CodeUri: ./
+      Handler: getFixtures.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetFixtures:
+          Type: Api
+          Properties:
+            Path: /teams/{teamId}/fixtures
+            Method: GET
+
+  GetTeamPlayersFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getTeamPlayers.ts
+    Properties:
+      CodeUri: ./
+      Handler: getTeamPlayers.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetTeamPlayers:
+          Type: Api
+          Properties:
+            Path: /teams/{teamId}/players
+            Method: GET
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"

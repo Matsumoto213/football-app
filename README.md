@@ -63,6 +63,10 @@ Football App Backend: http://localhost:3001
   GET /teams/{teamId}
   GET /teams/{teamId}/fixtures?type=past|upcoming|recent
   GET /teams/{teamId}/players
+  GET /fixtures/{fixtureId}
+  GET /fixtures/{fixtureId}/lineups
+  GET /players/{playerId}?season={year}
+  GET /players/{playerId}/stats?season={year}
 ```
 
 ---
@@ -76,7 +80,9 @@ Football App Backend: http://localhost:3001
 
 ---
 
-## API エンドポイント（Phase 1）
+## API エンドポイント
+
+### チーム・試合系
 
 | メソッド | パス | 説明 | パラメータ |
 |---|---|---|---|
@@ -84,6 +90,15 @@ Football App Backend: http://localhost:3001
 | GET | `/teams/{teamId}` | チーム基本情報 | - |
 | GET | `/teams/{teamId}/fixtures` | 試合一覧 | `type=past\|upcoming\|recent` |
 | GET | `/teams/{teamId}/players` | チーム内選手一覧 | - |
+
+### 試合詳細・選手系
+
+| メソッド | パス | 説明 | パラメータ |
+|---|---|---|---|
+| GET | `/fixtures/{fixtureId}` | 試合詳細 | - |
+| GET | `/fixtures/{fixtureId}/lineups` | 出場選手・スタッツ | - |
+| GET | `/players/{playerId}` | 選手プロフィール | `season`（任意、省略時は自動判定） |
+| GET | `/players/{playerId}/stats` | 選手シーズンスタッツ | `season`（任意、省略時は自動判定） |
 
 ### レスポンス形式
 
@@ -112,6 +127,20 @@ curl "http://localhost:3001/teams/42/fixtures?type=upcoming"
 
 # 選手一覧
 curl "http://localhost:3001/teams/42/players"
+
+# 試合詳細（fixtureId は fixtures 一覧から取得）
+curl "http://localhost:3001/fixtures/1035084"
+
+# 試合の出場選手・スタッツ
+curl "http://localhost:3001/fixtures/1035084/lineups"
+
+# 選手プロフィール（season 省略時は自動判定）
+curl "http://localhost:3001/players/285"
+curl "http://localhost:3001/players/285?season=2024"
+
+# 選手シーズンスタッツ
+curl "http://localhost:3001/players/285/stats"
+curl "http://localhost:3001/players/285/stats?season=2024"
 ```
 
 ---

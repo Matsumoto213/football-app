@@ -1,0 +1,14 @@
+{
+  "httpMethod": "GET",
+  "path": "/fixtures/1035084",
+  "queryStringParameters": null,
+  "pathParameters": { "fixtureId": "1035084" },
+  "headers": {},
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "body": null,
+  "isBase64Encoded": false,
+  "resource": "",
+  "stageVariables": null,
+  "requestContext": {}
+}

@@ -9,6 +9,10 @@ import { handler as searchTeams } from "./handlers/searchTeams";
 import { handler as getTeam } from "./handlers/getTeam";
 import { handler as getFixtures } from "./handlers/getFixtures";
 import { handler as getTeamPlayers } from "./handlers/getTeamPlayers";
+import { handler as getFixtureDetail } from "./handlers/getFixtureDetail";
+import { handler as getFixtureLineups } from "./handlers/getFixtureLineups";
+import { handler as getPlayer } from "./handlers/getPlayer";
+import { handler as getPlayerStats } from "./handlers/getPlayerStats";
 
 type Handler = (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult | void>;
 
@@ -32,6 +36,10 @@ const routes: Route[] = [
   route("GET", "/teams/{teamId}/fixtures", getFixtures as Handler),
   route("GET", "/teams/{teamId}/players", getTeamPlayers as Handler),
   route("GET", "/teams/{teamId}", getTeam as Handler),
+  route("GET", "/fixtures/{fixtureId}/lineups", getFixtureLineups as Handler),
+  route("GET", "/fixtures/{fixtureId}", getFixtureDetail as Handler),
+  route("GET", "/players/{playerId}/stats", getPlayerStats as Handler),
+  route("GET", "/players/{playerId}", getPlayer as Handler),
 ];
 
 const CORS = {
@@ -104,5 +112,9 @@ createServer(async (req: IncomingMessage, res: ServerResponse) => {
   console.log("  GET /teams/search?q={チーム名}");
   console.log("  GET /teams/{teamId}");
   console.log("  GET /teams/{teamId}/fixtures?type=past|upcoming|recent");
-  console.log("  GET /teams/{teamId}/players\n");
+  console.log("  GET /teams/{teamId}/players");
+  console.log("  GET /fixtures/{fixtureId}");
+  console.log("  GET /fixtures/{fixtureId}/lineups");
+  console.log("  GET /players/{playerId}?season={year}");
+  console.log("  GET /players/{playerId}/stats?season={year}\n");
 });

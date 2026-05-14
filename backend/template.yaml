@@ -108,6 +108,94 @@ Resources:
             Path: /teams/{teamId}/players
             Method: GET
 
+  GetFixtureDetailFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getFixtureDetail.ts
+    Properties:
+      CodeUri: ./
+      Handler: getFixtureDetail.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetFixtureDetail:
+          Type: Api
+          Properties:
+            Path: /fixtures/{fixtureId}
+            Method: GET
+
+  GetFixtureLineupsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getFixtureLineups.ts
+    Properties:
+      CodeUri: ./
+      Handler: getFixtureLineups.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetFixtureLineups:
+          Type: Api
+          Properties:
+            Path: /fixtures/{fixtureId}/lineups
+            Method: GET
+
+  GetPlayerFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getPlayer.ts
+    Properties:
+      CodeUri: ./
+      Handler: getPlayer.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetPlayer:
+          Type: Api
+          Properties:
+            Path: /players/{playerId}
+            Method: GET
+
+  GetPlayerStatsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getPlayerStats.ts
+    Properties:
+      CodeUri: ./
+      Handler: getPlayerStats.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetPlayerStats:
+          Type: Api
+          Properties:
+            Path: /players/{playerId}/stats
+            Method: GET
+
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL

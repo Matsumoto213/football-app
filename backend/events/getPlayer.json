@@ -1,0 +1,14 @@
+{
+  "httpMethod": "GET",
+  "path": "/players/285",
+  "queryStringParameters": { "season": "2024" },
+  "pathParameters": { "playerId": "285" },
+  "headers": {},
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "body": null,
+  "isBase64Encoded": false,
+  "resource": "",
+  "stageVariables": null,
+  "requestContext": {}
+}

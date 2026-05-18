@@ -8,21 +8,27 @@ import { ok, badRequest, notFound, serviceUnavailable, internalError } from "../
 
 function defaultSeason(): number {
   const now = new Date();
-  // 8月以降なら現在年、それ以前なら前年（欧州サッカーシーズンに合わせる）
   return now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+}
+
+async function fetchEntries(playerId: number, season: number): Promise<ApiPlayerEntry[]> {
+  return fetchApiFootball<ApiPlayerEntry[]>(`/players?id=${playerId}&season=${season}`);
 }
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const playerId = Number(event.pathParameters?.playerId);
   if (isNaN(playerId) || playerId <= 0) return badRequest("有効な playerId を指定してください");
 
-  const season = Number(event.queryStringParameters?.season ?? defaultSeason());
+  const explicitSeason = event.queryStringParameters?.season;
+  const season = Number(explicitSeason ?? defaultSeason());
   if (isNaN(season)) return badRequest("season は数値で指定してください");
 
   try {
-    const entries = await fetchApiFootball<ApiPlayerEntry[]>(
-      `/players?id=${playerId}&season=${season}`
-    );
+    let entries = await fetchEntries(playerId, season);
+    // 指定シーズンにデータがなく、かつシーズンが自動計算の場合は前シーズンで再試行
+    if (entries.length === 0 && !explicitSeason) {
+      entries = await fetchEntries(playerId, season - 1);
+    }
     if (entries.length === 0) return notFound("選手が見つかりません");
     return ok(transformPlayerProfile(entries[0]));
   } catch (err) {

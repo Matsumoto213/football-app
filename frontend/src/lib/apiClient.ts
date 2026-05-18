@@ -25,6 +25,10 @@ export function searchTeams(q: string): Promise<Team[]> {
   });
 }
 
+export function getLeagueTeams(leagueId: number | string): Promise<Team[]> {
+  return apiFetch(`/leagues/${leagueId}/teams`, { cache: "no-store" });
+}
+
 export function getTeam(teamId: number | string): Promise<Team> {
   return apiFetch(`/teams/${teamId}`);
 }

@@ -13,6 +13,7 @@ import { handler as getFixtureDetail } from "./handlers/getFixtureDetail";
 import { handler as getFixtureLineups } from "./handlers/getFixtureLineups";
 import { handler as getPlayer } from "./handlers/getPlayer";
 import { handler as getPlayerStats } from "./handlers/getPlayerStats";
+import { handler as getLeagueTeams } from "./handlers/getLeagueTeams";
 
 type Handler = (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult | void>;
 
@@ -40,6 +41,7 @@ const routes: Route[] = [
   route("GET", "/fixtures/{fixtureId}", getFixtureDetail as Handler),
   route("GET", "/players/{playerId}/stats", getPlayerStats as Handler),
   route("GET", "/players/{playerId}", getPlayer as Handler),
+  route("GET", "/leagues/{leagueId}/teams", getLeagueTeams as Handler),
 ];
 
 const CORS = {
@@ -116,5 +118,6 @@ createServer(async (req: IncomingMessage, res: ServerResponse) => {
   console.log("  GET /fixtures/{fixtureId}");
   console.log("  GET /fixtures/{fixtureId}/lineups");
   console.log("  GET /players/{playerId}?season={year}");
-  console.log("  GET /players/{playerId}/stats?season={year}\n");
+  console.log("  GET /players/{playerId}/stats?season={year}");
+  console.log("  GET /leagues/{leagueId}/teams?season={year}\n");
 });

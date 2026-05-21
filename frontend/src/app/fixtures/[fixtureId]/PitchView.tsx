@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import type { TeamFormation, FormationPlayer, FixtureTeamStats } from "@/types/fixture";
 import type { PlayerMatchStats } from "@/types/fixture";
 
 type PlayerStats = PlayerMatchStats["stats"];
-type MergedPlayer = FormationPlayer & { stats?: PlayerStats };
+type PlayerData = { stats: PlayerStats; photo?: string };
+type MergedPlayer = FormationPlayer & { stats?: PlayerStats; photo?: string };
+type SelectedEntry = { player: MergedPlayer; color: "home" | "away" };
 
 export interface PitchViewProps {
   homeTeamId: number;
@@ -45,11 +47,15 @@ function PlayerToken({
   player,
   color,
   isSelected,
+  onEnter,
+  onLeave,
   onClick,
 }: {
   player: MergedPlayer;
   color: "home" | "away";
   isSelected: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
   onClick: () => void;
 }) {
   const hasGoal = (player.stats?.goals ?? 0) > 0;
@@ -57,23 +63,21 @@ function PlayerToken({
   const hasRed = (player.stats?.redCards ?? 0) > 0;
   const rating = parseFloat(player.stats?.rating ?? "");
 
-  const circleBg =
-    color === "home"
-      ? "bg-emerald-700 border-emerald-400"
-      : "bg-blue-700 border-blue-400";
-  const selectedRing = isSelected
+  const borderCls =
+    color === "home" ? "border-emerald-400" : "border-blue-400";
+  const ringCls = isSelected
     ? "ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110"
     : "group-hover:scale-105";
 
   return (
     <button
       className="group flex flex-col items-center gap-0.5 cursor-pointer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
     >
       <div className="relative">
+        {/* Indicators */}
         {hasGoal && (
           <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-emerald-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center z-10">
             ⚽
@@ -85,23 +89,49 @@ function PlayerToken({
         {!hasGoal && !hasRed && hasYellow && (
           <span className="absolute -top-1 -right-1 w-1.5 h-2.5 bg-yellow-400 rounded-sm z-10" />
         )}
+
+        {/* Avatar circle */}
         <div
-          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold text-white transition-all ${circleBg} ${selectedRing}`}
+          className={`w-10 h-10 rounded-full border-2 overflow-hidden flex items-center justify-center transition-all ${borderCls} ${ringCls} ${
+            player.photo ? "bg-zinc-800" : color === "home" ? "bg-emerald-700" : "bg-blue-700"
+          }`}
         >
-          {player.number ?? "?"}
+          {player.photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={player.photo}
+              alt={player.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+                (e.currentTarget.nextSibling as HTMLElement | null)?.removeAttribute("hidden");
+              }}
+            />
+          ) : null}
+          {/* Fallback number (shown when no photo or photo fails) */}
+          <span
+            className="text-xs font-bold text-white"
+            hidden={!!player.photo}
+          >
+            {player.number ?? "?"}
+          </span>
         </div>
+
+        {/* Number badge (shown over photo) */}
+        {player.photo && player.number != null && (
+          <span className="absolute -bottom-0.5 -right-0.5 text-[8px] bg-zinc-900/90 text-zinc-200 rounded-full w-4 h-4 flex items-center justify-center border border-zinc-700 font-mono leading-none z-10">
+            {player.number}
+          </span>
+        )}
       </div>
+
       <span className="text-[9px] text-zinc-300 leading-tight text-center w-14 truncate">
         {shortName(player.name)}
       </span>
       {!isNaN(rating) && (
         <span
           className={`text-[8px] font-bold leading-none ${
-            rating >= 8
-              ? "text-emerald-400"
-              : rating >= 7
-              ? "text-zinc-300"
-              : "text-zinc-500"
+            rating >= 8 ? "text-emerald-400" : rating >= 7 ? "text-zinc-300" : "text-zinc-500"
           }`}
         >
           {rating.toFixed(1)}
@@ -112,31 +142,28 @@ function PlayerToken({
 }
 
 // ---- Selected player stats panel ----
-function PlayerPanel({
-  player,
-  color,
-}: {
-  player: MergedPlayer;
-  color: "home" | "away";
-}) {
+function PlayerPanel({ player, color }: { player: MergedPlayer; color: "home" | "away" }) {
   const rating = parseFloat(player.stats?.rating ?? "");
   const ratingCls = isNaN(rating)
     ? "text-zinc-500"
-    : rating >= 8
-    ? "text-emerald-400"
-    : rating >= 7
-    ? "text-zinc-200"
-    : "text-zinc-500";
-  const borderCls =
-    color === "home" ? "border-emerald-800/60" : "border-blue-800/60";
+    : rating >= 8 ? "text-emerald-400" : rating >= 7 ? "text-zinc-200" : "text-zinc-500";
+  const borderCls = color === "home" ? "border-emerald-800/60" : "border-blue-800/60";
 
   return (
     <div className={`bg-zinc-900 border ${borderCls} rounded-2xl p-4`}>
-      <div className="flex items-start justify-between mb-3">
-        <div>
+      <div className="flex items-center gap-3 mb-3">
+        {player.photo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={player.photo}
+            alt={player.name}
+            className="w-12 h-12 rounded-full object-cover flex-shrink-0 bg-zinc-800"
+          />
+        )}
+        <div className="flex-1 min-w-0">
           <Link
             href={`/players/${player.id}`}
-            className="text-sm font-semibold text-zinc-100 hover:text-emerald-400 transition-colors"
+            className="text-sm font-semibold text-zinc-100 hover:text-emerald-400 transition-colors truncate block"
           >
             {player.name}
           </Link>
@@ -145,7 +172,7 @@ function PlayerPanel({
           </p>
         </div>
         {!isNaN(rating) && (
-          <div className={`text-2xl font-black ${ratingCls}`}>
+          <div className={`text-2xl font-black flex-shrink-0 ${ratingCls}`}>
             {rating.toFixed(1)}
           </div>
         )}
@@ -156,18 +183,10 @@ function PlayerPanel({
           <StatCell label="出場時間" value={`${player.stats.minutesPlayed}'`} />
         )}
         {player.stats?.goals != null && (
-          <StatCell
-            label="ゴール"
-            value={String(player.stats.goals)}
-            highlight={player.stats.goals > 0}
-          />
+          <StatCell label="ゴール" value={String(player.stats.goals)} highlight={player.stats.goals > 0} />
         )}
         {player.stats?.assists != null && (
-          <StatCell
-            label="アシスト"
-            value={String(player.stats.assists)}
-            blue={player.stats.assists > 0}
-          />
+          <StatCell label="アシスト" value={String(player.stats.assists)} blue={player.stats.assists > 0} />
         )}
         {player.stats?.shots != null && (
           <StatCell label="シュート" value={String(player.stats.shots)} />
@@ -176,10 +195,7 @@ function PlayerPanel({
           <StatCell label="パス" value={String(player.stats.passes)} />
         )}
         {(player.stats?.yellowCards ?? 0) > 0 && (
-          <StatCell
-            label="イエロー"
-            value={String(player.stats!.yellowCards)}
-          />
+          <StatCell label="イエロー" value={String(player.stats!.yellowCards)} />
         )}
         {(player.stats?.redCards ?? 0) > 0 && (
           <StatCell label="レッド" value={String(player.stats!.redCards)} />
@@ -190,24 +206,14 @@ function PlayerPanel({
 }
 
 function StatCell({
-  label,
-  value,
-  highlight,
-  blue,
+  label, value, highlight, blue,
 }: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  blue?: boolean;
+  label: string; value: string; highlight?: boolean; blue?: boolean;
 }) {
   return (
     <div className="bg-zinc-800 rounded-lg p-2 text-center">
       <div className="text-[10px] text-zinc-500 mb-1">{label}</div>
-      <div
-        className={`text-sm font-bold ${
-          highlight ? "text-emerald-400" : blue ? "text-blue-400" : "text-zinc-200"
-        }`}
-      >
+      <div className={`text-sm font-bold ${highlight ? "text-emerald-400" : blue ? "text-blue-400" : "text-zinc-200"}`}>
         {value}
       </div>
     </div>
@@ -215,28 +221,12 @@ function StatCell({
 }
 
 // ---- Sub list row ----
-function SubRow({
-  player,
-  color,
-}: {
-  player: MergedPlayer;
-  color: "home" | "away";
-}) {
-  const posCls =
-    color === "home"
-      ? "bg-emerald-950 text-emerald-600"
-      : "bg-blue-950 text-blue-600";
+function SubRow({ player, color }: { player: MergedPlayer; color: "home" | "away" }) {
+  const posCls = color === "home" ? "bg-emerald-950 text-emerald-600" : "bg-blue-950 text-blue-600";
   return (
-    <Link
-      href={`/players/${player.id}`}
-      className="flex items-center gap-2 hover:text-emerald-400 transition-colors"
-    >
-      <span className="text-xs text-zinc-600 font-mono w-4 text-right flex-shrink-0">
-        {player.number}
-      </span>
-      <span className={`text-[10px] px-1 py-0.5 rounded font-mono flex-shrink-0 ${posCls}`}>
-        {player.pos}
-      </span>
+    <Link href={`/players/${player.id}`} className="flex items-center gap-2 hover:text-emerald-400 transition-colors">
+      <span className="text-xs text-zinc-600 font-mono w-4 text-right flex-shrink-0">{player.number}</span>
+      <span className={`text-[10px] px-1 py-0.5 rounded font-mono flex-shrink-0 ${posCls}`}>{player.pos}</span>
       <span className="text-xs text-zinc-400 truncate">{player.name}</span>
     </Link>
   );
@@ -250,9 +240,7 @@ function PitchMarkings() {
       <div className="absolute top-1/2 left-3 right-3 h-px bg-white/15" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border border-white/15" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/25" />
-      {/* Away penalty area */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-14 border-x border-b border-white/10" />
-      {/* Home penalty area */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-36 h-14 border-x border-t border-white/10" />
     </div>
   );
@@ -260,28 +248,30 @@ function PitchMarkings() {
 
 // ---- Main export ----
 export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
-  const [selected, setSelected] = useState<{
-    player: MergedPlayer;
-    color: "home" | "away";
-  } | null>(null);
+  // hovered: set by mouse enter/leave (desktop hover)
+  // pinned: set by click (mobile tap or persistent selection)
+  // display priority: hovered > pinned
+  const [hovered, setHovered] = useState<SelectedEntry | null>(null);
+  const [pinned, setPinned] = useState<SelectedEntry | null>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const homeFormation = formations.find((f) => f.team.id === homeTeamId);
   const awayFormation = formations.find((f) => f.team.id !== homeTeamId);
   if (!homeFormation || !awayFormation) return null;
 
-  // Build stats maps keyed by player id
-  const homeMap = new Map<number, PlayerStats>();
-  const awayMap = new Map<number, PlayerStats>();
+  // Build data maps keyed by player id (stats + photo)
+  const homeMap = new Map<number, PlayerData>();
+  const awayMap = new Map<number, PlayerData>();
   for (const lineup of lineups) {
     const map = lineup.team.id === homeTeamId ? homeMap : awayMap;
     for (const { player, stats } of lineup.players) {
-      map.set(player.id, stats);
+      map.set(player.id, { stats, photo: player.photo });
     }
   }
 
-  const merge = (fp: FormationPlayer, map: Map<number, PlayerStats>): MergedPlayer => ({
+  const merge = (fp: FormationPlayer, map: Map<number, PlayerData>): MergedPlayer => ({
     ...fp,
-    stats: map.get(fp.id),
+    ...map.get(fp.id),
   });
 
   const homePlayers = homeFormation.startXI.map((p) => merge(p, homeMap));
@@ -292,10 +282,23 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
   const homeRows = groupByRow(homePlayers);
   const awayRows = groupByRow(awayPlayers);
 
-  // Away: GK (row1) at top → FWD near center (ascending)
   const awayOrder = Array.from(awayRows.keys()).sort((a, b) => a - b);
-  // Home: FWD near center → GK (row1) at bottom (descending)
   const homeOrder = Array.from(homeRows.keys()).sort((a, b) => b - a);
+
+  const displayed = hovered ?? pinned;
+
+  const handleEnter = (player: MergedPlayer, color: "home" | "away") => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    setHovered({ player, color });
+  };
+
+  const handleLeave = () => {
+    leaveTimer.current = setTimeout(() => setHovered(null), 150);
+  };
+
+  const handleClick = (player: MergedPlayer, color: "home" | "away") => {
+    setPinned((prev) => (prev?.player.id === player.id ? null : { player, color }));
+  };
 
   const renderRows = (
     order: number[],
@@ -309,19 +312,17 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
             key={player.id}
             player={player}
             color={color}
-            isSelected={selected?.player.id === player.id}
-            onClick={() =>
-              setSelected((prev) =>
-                prev?.player.id === player.id ? null : { player, color }
-              )
-            }
+            isSelected={displayed?.player.id === player.id}
+            onEnter={() => handleEnter(player, color)}
+            onLeave={handleLeave}
+            onClick={() => handleClick(player, color)}
           />
         ))}
       </div>
     ));
 
   return (
-    <div className="space-y-3" onClick={() => setSelected(null)}>
+    <div className="space-y-3" onClick={() => setPinned(null)}>
       {/* Formation labels */}
       <div className="flex justify-between items-center text-xs">
         <div className="flex items-center gap-1.5">
@@ -359,9 +360,9 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
         </div>
       </div>
 
-      {/* Selected player panel */}
-      {selected && (
-        <PlayerPanel player={selected.player} color={selected.color} />
+      {/* Stats panel: shown on hover or click */}
+      {displayed && (
+        <PlayerPanel player={displayed.player} color={displayed.color} />
       )}
 
       {/* Substitutes */}
@@ -372,14 +373,10 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
           </h3>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             <div className="space-y-1.5">
-              {homeSubs.map((p) => (
-                <SubRow key={p.id} player={p} color="home" />
-              ))}
+              {homeSubs.map((p) => <SubRow key={p.id} player={p} color="home" />)}
             </div>
             <div className="space-y-1.5">
-              {awaySubs.map((p) => (
-                <SubRow key={p.id} player={p} color="away" />
-              ))}
+              {awaySubs.map((p) => <SubRow key={p.id} player={p} color="away" />)}
             </div>
           </div>
         </div>

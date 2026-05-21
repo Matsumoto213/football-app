@@ -29,6 +29,17 @@ export type PlayerMatchStats = {
 
 export type FixtureTeamStats = {
   team: TeamRef;
-  formation: string | null;
   players: PlayerMatchStats[];
+};
+
+export type FixtureStatItem = {
+  label: string;
+  home: string | number;
+  away: string | number;
+};
+
+export type FixtureStats = {
+  homeTeamId: number;
+  awayTeamId: number;
+  stats: FixtureStatItem[];
 };

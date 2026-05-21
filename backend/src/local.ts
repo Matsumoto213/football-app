@@ -12,6 +12,7 @@ import { handler as getTeamPlayers } from "./handlers/getTeamPlayers";
 import { handler as getFixtureDetail } from "./handlers/getFixtureDetail";
 import { handler as getFixtureLineups } from "./handlers/getFixtureLineups";
 import { handler as getFixtureStats } from "./handlers/getFixtureStats";
+import { handler as getFixtureFormation } from "./handlers/getFixtureFormation";
 import { handler as getPlayer } from "./handlers/getPlayer";
 import { handler as getPlayerStats } from "./handlers/getPlayerStats";
 import { handler as getLeagueTeams } from "./handlers/getLeagueTeams";
@@ -38,6 +39,7 @@ const routes: Route[] = [
   route("GET", "/teams/{teamId}/fixtures", getFixtures as Handler),
   route("GET", "/teams/{teamId}/players", getTeamPlayers as Handler),
   route("GET", "/teams/{teamId}", getTeam as Handler),
+  route("GET", "/fixtures/{fixtureId}/formation", getFixtureFormation as Handler),
   route("GET", "/fixtures/{fixtureId}/lineups", getFixtureLineups as Handler),
   route("GET", "/fixtures/{fixtureId}/stats", getFixtureStats as Handler),
   route("GET", "/fixtures/{fixtureId}", getFixtureDetail as Handler),

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getFixtureDetail, getFixtureLineups, getFixtureStats } from "@/lib/apiClient";
+import { getFixtureDetail, getFixtureLineups, getFixtureStats, getFixtureFormation } from "@/lib/apiClient";
 import type { Fixture, FixtureStatus, FixtureTeamStats, FixtureStats, FixtureStatItem } from "@/types/fixture";
+import { PitchView } from "./PitchView";
 
 // ---- Status badge ----
 const STATUS_CONFIG: Record<FixtureStatus, { label: string; cls: string }> = {
@@ -109,10 +110,11 @@ function LineupSection({ team }: { team: FixtureTeamStats }) {
 export default async function FixturePage({ params }: { params: Promise<{ fixtureId: string }> }) {
   const { fixtureId } = await params;
 
-  const [fixture, lineups, statsResult] = await Promise.all([
+  const [fixture, lineups, statsResult, formations] = await Promise.all([
     getFixtureDetail(fixtureId).catch((): null => null),
     getFixtureLineups(fixtureId).catch((): FixtureTeamStats[] => []),
     getFixtureStats(fixtureId).catch((): [] => []),
+    getFixtureFormation(fixtureId).catch((): [] => []),
   ]);
 
   const fixtureStats: FixtureStats | null = Array.isArray(statsResult) ? null : statsResult;
@@ -212,15 +214,26 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
         </div>
       )}
 
-      {/* Lineups */}
-      {lineups.length > 0 && (
+      {/* Lineups: pitch view if formation data available, table fallback otherwise */}
+      {formations.length >= 2 ? (
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">
+            出場選手
+          </h2>
+          <PitchView
+            homeTeamId={fixture.homeTeam.id}
+            formations={formations}
+            lineups={lineups}
+          />
+        </section>
+      ) : lineups.length > 0 ? (
         <section className="space-y-4">
           <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">
             出場選手
           </h2>
           {lineups.map((team) => <LineupSection key={team.team.id} team={team} />)}
         </section>
-      )}
+      ) : null}
     </div>
   );
 }

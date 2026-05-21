@@ -43,3 +43,19 @@ export type FixtureStats = {
   awayTeamId: number;
   stats: FixtureStatItem[];
 };
+
+export type FormationPlayer = {
+  id: number;
+  name: string;
+  number: number | null;
+  pos: string;
+  grid: string | null;
+  isSubstitute: boolean;
+};
+
+export type TeamFormation = {
+  team: { id: number; name: string; logo?: string };
+  formation: string;
+  startXI: FormationPlayer[];
+  substitutes: FormationPlayer[];
+};

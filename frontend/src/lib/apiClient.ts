@@ -1,5 +1,5 @@
 import type { Team } from "@/types/team";
-import type { Fixture, FixtureTeamStats, FixtureStats } from "@/types/fixture";
+import type { Fixture, FixtureTeamStats, FixtureStats, TeamFormation } from "@/types/fixture";
 import type { Player, PlayerSeasonStats } from "@/types/player";
 
 const BASE_URL =
@@ -60,6 +60,12 @@ export function getFixtureStats(
   fixtureId: number | string
 ): Promise<FixtureStats | []> {
   return apiFetch(`/fixtures/${fixtureId}/stats`);
+}
+
+export function getFixtureFormation(
+  fixtureId: number | string
+): Promise<TeamFormation[]> {
+  return apiFetch(`/fixtures/${fixtureId}/formation`);
 }
 
 export function getPlayer(

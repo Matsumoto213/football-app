@@ -10,7 +10,7 @@
 
 | レイヤー | 技術 |
 |---|---|
-| フロントエンド | Next.js（App Router） ※ Phase 2 以降 |
+| フロントエンド | Next.js 16（App Router） |
 | バックエンド | AWS Lambda（Node.js 20） + API Gateway |
 | IaC | AWS SAM |
 | 外部API | [API-FOOTBALL v3](https://www.api-football.com/) |
@@ -20,8 +20,8 @@
 
 ## 必要な環境
 
-- Node.js 16 以上
-- npm 8 以上
+- Node.js **20** 以上（nvm 推奨）
+- npm 10 以上
 - API-FOOTBALL の APIキー（[登録はこちら](https://www.api-football.com/)）
 
 ---
@@ -54,35 +54,46 @@ PORT=3001
 npm run dev
 ```
 
-起動すると以下が表示される。
+起動すると `http://localhost:3001` でリクエストを受け付ける。
 
-```
-Football App Backend: http://localhost:3001
+---
 
-  GET /teams/search?q={チーム名}
-  GET /teams/{teamId}
-  GET /teams/{teamId}/fixtures?type=past|upcoming|recent
-  GET /teams/{teamId}/players
-  GET /fixtures/{fixtureId}
-  GET /fixtures/{fixtureId}/lineups
-  GET /players/{playerId}?season={year}
-  GET /players/{playerId}/stats?season={year}
+## フロントエンド ローカル起動
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+`http://localhost:3000` でアクセスできる。  
+バックエンドを先に起動しておく必要がある。
+
+> **Node.js バージョン注意**: Next.js 16 には Node.js 20 が必要。  
+> nvm を使う場合: `nvm use 20`
 
 ---
 
 ## 環境変数
+
+### バックエンド（`backend/.env`）
 
 | 変数名 | 必須 | 説明 |
 |---|---|---|
 | `API_FOOTBALL_KEY` | ✅ | API-FOOTBALL の APIキー |
 | `PORT` | - | ローカルサーバーのポート番号（デフォルト: 3001） |
 
+### フロントエンド（`frontend/.env.local`）
+
+| 変数名 | 必須 | 説明 |
+|---|---|---|
+| `NEXT_PUBLIC_API_BASE_URL` | - | バックエンドのURL（デフォルト: `http://localhost:3001`） |
+
 ---
 
 ## API エンドポイント
 
-### チーム・試合系
+### チーム・リーグ系
 
 | メソッド | パス | 説明 | パラメータ |
 |---|---|---|---|
@@ -90,13 +101,21 @@ Football App Backend: http://localhost:3001
 | GET | `/teams/{teamId}` | チーム基本情報 | - |
 | GET | `/teams/{teamId}/fixtures` | 試合一覧 | `type=past\|upcoming\|recent` |
 | GET | `/teams/{teamId}/players` | チーム内選手一覧 | - |
+| GET | `/leagues/{leagueId}/teams` | リーグのチーム一覧 | `season`（任意） |
 
-### 試合詳細・選手系
+### 試合系
 
 | メソッド | パス | 説明 | パラメータ |
 |---|---|---|---|
 | GET | `/fixtures/{fixtureId}` | 試合詳細 | - |
-| GET | `/fixtures/{fixtureId}/lineups` | 出場選手・スタッツ | - |
+| GET | `/fixtures/{fixtureId}/stats` | 試合スタッツ（支配率・シュート数など） | - |
+| GET | `/fixtures/{fixtureId}/lineups` | 出場選手・個人スタッツ | - |
+| GET | `/fixtures/{fixtureId}/formation` | フォーメーション・ピッチ上の座標 | - |
+
+### 選手系
+
+| メソッド | パス | 説明 | パラメータ |
+|---|---|---|---|
 | GET | `/players/{playerId}` | 選手プロフィール | `season`（任意、省略時は自動判定） |
 | GET | `/players/{playerId}/stats` | 選手シーズンスタッツ | `season`（任意、省略時は自動判定） |
 
@@ -110,37 +129,38 @@ Football App Backend: http://localhost:3001
 { "success": false, "data": null, "error": { "code": "BAD_REQUEST", "message": "..." } }
 ```
 
-### 動作確認例
+---
+
+## 動作確認例
 
 ```bash
-# Arsenal を検索（teamId: 42）
-curl "http://localhost:3001/teams/search?q=Arsenal"
-
-# チーム詳細
+# チーム詳細（Arsenal: teamId=42）
 curl "http://localhost:3001/teams/42"
+
+# リーグのチーム一覧（Premier League: leagueId=39）
+curl "http://localhost:3001/leagues/39/teams"
 
 # 過去10試合
 curl "http://localhost:3001/teams/42/fixtures?type=past"
 
-# 今後10試合
-curl "http://localhost:3001/teams/42/fixtures?type=upcoming"
-
-# 選手一覧
-curl "http://localhost:3001/teams/42/players"
-
 # 試合詳細（fixtureId は fixtures 一覧から取得）
 curl "http://localhost:3001/fixtures/1035084"
 
-# 試合の出場選手・スタッツ
+# 試合スタッツ
+curl "http://localhost:3001/fixtures/1035084/stats"
+
+# 出場選手・個人スタッツ
 curl "http://localhost:3001/fixtures/1035084/lineups"
 
-# 選手プロフィール（season 省略時は自動判定）
+# フォーメーション・ピッチ座標
+curl "http://localhost:3001/fixtures/1035084/formation"
+
+# 選手プロフィール
 curl "http://localhost:3001/players/285"
 curl "http://localhost:3001/players/285?season=2024"
 
 # 選手シーズンスタッツ
 curl "http://localhost:3001/players/285/stats"
-curl "http://localhost:3001/players/285/stats?season=2024"
 ```
 
 ---
@@ -148,5 +168,6 @@ curl "http://localhost:3001/players/285/stats?season=2024"
 ## 注意事項
 
 - API-FOOTBALL の無料プランは **100リクエスト/日** の制限あり
+- 無料プランで利用可能なシーズンは **2022〜2024**（2025以降は有料）
 - `.env` は `.gitignore` 済み。APIキーをコミットしないこと
 - `.env.example` はプレースホルダーのみ記載すること

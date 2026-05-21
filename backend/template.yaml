@@ -152,6 +152,28 @@ Resources:
             Path: /fixtures/{fixtureId}/stats
             Method: GET
 
+  GetFixtureFormationFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        EntryPoints:
+          - src/handlers/getFixtureFormation.ts
+    Properties:
+      CodeUri: ./
+      Handler: getFixtureFormation.handler
+      Environment:
+        Variables:
+          API_FOOTBALL_KEY: !Ref ApiFootballKey
+      Events:
+        GetFixtureFormation:
+          Type: Api
+          Properties:
+            Path: /fixtures/{fixtureId}/formation
+            Method: GET
+
   GetFixtureLineupsFunction:
     Type: AWS::Serverless::Function
     Metadata:

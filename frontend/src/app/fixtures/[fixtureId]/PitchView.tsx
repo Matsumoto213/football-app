@@ -42,42 +42,162 @@ function groupByRow(players: MergedPlayer[]): Map<number, MergedPlayer[]> {
   return rows;
 }
 
+// ---- Floating tooltip card ----
+function PlayerTooltip({
+  player,
+  dir,
+}: {
+  player: MergedPlayer;
+  dir: "up" | "down";
+}) {
+  const rating = parseFloat(player.stats?.rating ?? "");
+  const ratingCls = isNaN(rating)
+    ? "text-zinc-400"
+    : rating >= 8
+    ? "text-emerald-400"
+    : rating >= 7
+    ? "text-zinc-200"
+    : "text-zinc-500";
+
+  const positionCls =
+    dir === "up"
+      ? "bottom-full mb-3 left-1/2 -translate-x-1/2"
+      : "top-full mt-3 left-1/2 -translate-x-1/2";
+
+  return (
+    <div
+      className={`absolute z-50 w-44 bg-zinc-950/95 border border-zinc-700 rounded-xl shadow-2xl p-3 pointer-events-none ${positionCls}`}
+    >
+      {/* Arrow */}
+      <span
+        className={`absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-zinc-950 border-zinc-700 rotate-45 ${
+          dir === "up"
+            ? "top-full -translate-y-[7px] border-b border-r"
+            : "bottom-full translate-y-[7px] border-t border-l"
+        }`}
+      />
+
+      {/* Header: photo + name + rating */}
+      <div className="flex items-center gap-2 mb-2">
+        {player.photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={player.photo}
+            alt={player.name}
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-zinc-800"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-zinc-100 truncate leading-tight">
+            {player.name}
+          </p>
+          <p className="text-[10px] text-zinc-500">
+            #{player.number ?? "—"} · {player.pos}
+          </p>
+        </div>
+        {!isNaN(rating) && (
+          <span className={`text-lg font-black flex-shrink-0 ${ratingCls}`}>
+            {rating.toFixed(1)}
+          </span>
+        )}
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
+        {player.stats?.minutesPlayed != null && (
+          <Row label="時間" value={`${player.stats.minutesPlayed}'`} />
+        )}
+        {player.stats?.goals != null && (
+          <Row
+            label="ゴール"
+            value={String(player.stats.goals)}
+            cls={player.stats.goals > 0 ? "text-emerald-400 font-bold" : "text-zinc-300"}
+          />
+        )}
+        {player.stats?.assists != null && (
+          <Row
+            label="アシスト"
+            value={String(player.stats.assists)}
+            cls={player.stats.assists > 0 ? "text-blue-400 font-bold" : "text-zinc-300"}
+          />
+        )}
+        {player.stats?.shots != null && (
+          <Row label="シュート" value={String(player.stats.shots)} />
+        )}
+        {player.stats?.passes != null && (
+          <Row label="パス" value={String(player.stats.passes)} />
+        )}
+        {(player.stats?.yellowCards ?? 0) > 0 && (
+          <Row label="イエロー" value={String(player.stats!.yellowCards)} />
+        )}
+        {(player.stats?.redCards ?? 0) > 0 && (
+          <Row label="レッド" value={String(player.stats!.redCards)} />
+        )}
+      </div>
+
+      {/* Link hint */}
+      <p className="mt-2 text-[9px] text-zinc-600 text-right">タップで選手ページへ →</p>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  cls = "text-zinc-300",
+}: {
+  label: string;
+  value: string;
+  cls?: string;
+}) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-zinc-500">{label}</span>
+      <span className={cls}>{value}</span>
+    </div>
+  );
+}
+
 // ---- Player token on the pitch ----
 function PlayerToken({
   player,
   color,
+  tooltipDir,
   isSelected,
   onEnter,
   onLeave,
-  onClick,
 }: {
   player: MergedPlayer;
   color: "home" | "away";
+  tooltipDir: "up" | "down";
   isSelected: boolean;
   onEnter: () => void;
   onLeave: () => void;
-  onClick: () => void;
 }) {
   const hasGoal = (player.stats?.goals ?? 0) > 0;
   const hasYellow = (player.stats?.yellowCards ?? 0) > 0;
   const hasRed = (player.stats?.redCards ?? 0) > 0;
-  const rating = parseFloat(player.stats?.rating ?? "");
 
-  const borderCls =
-    color === "home" ? "border-emerald-400" : "border-blue-400";
+  const borderCls = color === "home" ? "border-emerald-400" : "border-blue-400";
   const ringCls = isSelected
     ? "ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110"
     : "group-hover:scale-105";
 
   return (
-    <button
-      className="group flex flex-col items-center gap-0.5 cursor-pointer"
+    <Link
+      href={`/players/${player.id}`}
+      className="group relative flex flex-col items-center gap-0.5"
+      style={{ zIndex: isSelected ? 50 : 1 }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
     >
+      {/* Floating tooltip */}
+      {isSelected && <PlayerTooltip player={player} dir={tooltipDir} />}
+
       <div className="relative">
-        {/* Indicators */}
+        {/* Goal / card badge */}
         {hasGoal && (
           <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-emerald-500 text-white rounded-full w-3.5 h-3.5 flex items-center justify-center z-10">
             ⚽
@@ -104,20 +224,17 @@ function PlayerToken({
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).style.display = "none";
-                (e.currentTarget.nextSibling as HTMLElement | null)?.removeAttribute("hidden");
+                const sib = e.currentTarget.nextSibling as HTMLElement | null;
+                if (sib) sib.removeAttribute("hidden");
               }}
             />
           ) : null}
-          {/* Fallback number (shown when no photo or photo fails) */}
-          <span
-            className="text-xs font-bold text-white"
-            hidden={!!player.photo}
-          >
+          <span className="text-xs font-bold text-white" hidden={!!player.photo}>
             {player.number ?? "?"}
           </span>
         </div>
 
-        {/* Number badge (shown over photo) */}
+        {/* Number badge over photo */}
         {player.photo && player.number != null && (
           <span className="absolute -bottom-0.5 -right-0.5 text-[8px] bg-zinc-900/90 text-zinc-200 rounded-full w-4 h-4 flex items-center justify-center border border-zinc-700 font-mono leading-none z-10">
             {player.number}
@@ -128,138 +245,55 @@ function PlayerToken({
       <span className="text-[9px] text-zinc-300 leading-tight text-center w-14 truncate">
         {shortName(player.name)}
       </span>
-      {!isNaN(rating) && (
-        <span
-          className={`text-[8px] font-bold leading-none ${
-            rating >= 8 ? "text-emerald-400" : rating >= 7 ? "text-zinc-300" : "text-zinc-500"
-          }`}
-        >
-          {rating.toFixed(1)}
-        </span>
-      )}
-    </button>
-  );
-}
-
-// ---- Selected player stats panel ----
-function PlayerPanel({ player, color }: { player: MergedPlayer; color: "home" | "away" }) {
-  const rating = parseFloat(player.stats?.rating ?? "");
-  const ratingCls = isNaN(rating)
-    ? "text-zinc-500"
-    : rating >= 8 ? "text-emerald-400" : rating >= 7 ? "text-zinc-200" : "text-zinc-500";
-  const borderCls = color === "home" ? "border-emerald-800/60" : "border-blue-800/60";
-
-  return (
-    <div className={`bg-zinc-900 border ${borderCls} rounded-2xl p-4`}>
-      <div className="flex items-center gap-3 mb-3">
-        {player.photo && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={player.photo}
-            alt={player.name}
-            className="w-12 h-12 rounded-full object-cover flex-shrink-0 bg-zinc-800"
-          />
-        )}
-        <div className="flex-1 min-w-0">
-          <Link
-            href={`/players/${player.id}`}
-            className="text-sm font-semibold text-zinc-100 hover:text-emerald-400 transition-colors truncate block"
-          >
-            {player.name}
-          </Link>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            #{player.number ?? "—"} · {player.pos}
-          </p>
-        </div>
-        {!isNaN(rating) && (
-          <div className={`text-2xl font-black flex-shrink-0 ${ratingCls}`}>
-            {rating.toFixed(1)}
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {player.stats?.minutesPlayed != null && (
-          <StatCell label="出場時間" value={`${player.stats.minutesPlayed}'`} />
-        )}
-        {player.stats?.goals != null && (
-          <StatCell label="ゴール" value={String(player.stats.goals)} highlight={player.stats.goals > 0} />
-        )}
-        {player.stats?.assists != null && (
-          <StatCell label="アシスト" value={String(player.stats.assists)} blue={player.stats.assists > 0} />
-        )}
-        {player.stats?.shots != null && (
-          <StatCell label="シュート" value={String(player.stats.shots)} />
-        )}
-        {player.stats?.passes != null && (
-          <StatCell label="パス" value={String(player.stats.passes)} />
-        )}
-        {(player.stats?.yellowCards ?? 0) > 0 && (
-          <StatCell label="イエロー" value={String(player.stats!.yellowCards)} />
-        )}
-        {(player.stats?.redCards ?? 0) > 0 && (
-          <StatCell label="レッド" value={String(player.stats!.redCards)} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatCell({
-  label, value, highlight, blue,
-}: {
-  label: string; value: string; highlight?: boolean; blue?: boolean;
-}) {
-  return (
-    <div className="bg-zinc-800 rounded-lg p-2 text-center">
-      <div className="text-[10px] text-zinc-500 mb-1">{label}</div>
-      <div className={`text-sm font-bold ${highlight ? "text-emerald-400" : blue ? "text-blue-400" : "text-zinc-200"}`}>
-        {value}
-      </div>
-    </div>
+    </Link>
   );
 }
 
 // ---- Sub list row ----
 function SubRow({ player, color }: { player: MergedPlayer; color: "home" | "away" }) {
-  const posCls = color === "home" ? "bg-emerald-950 text-emerald-600" : "bg-blue-950 text-blue-600";
+  const posCls =
+    color === "home" ? "bg-emerald-950 text-emerald-600" : "bg-blue-950 text-blue-600";
   return (
-    <Link href={`/players/${player.id}`} className="flex items-center gap-2 hover:text-emerald-400 transition-colors">
-      <span className="text-xs text-zinc-600 font-mono w-4 text-right flex-shrink-0">{player.number}</span>
-      <span className={`text-[10px] px-1 py-0.5 rounded font-mono flex-shrink-0 ${posCls}`}>{player.pos}</span>
+    <Link
+      href={`/players/${player.id}`}
+      className="flex items-center gap-2 hover:text-emerald-400 transition-colors"
+    >
+      <span className="text-xs text-zinc-600 font-mono w-4 text-right flex-shrink-0">
+        {player.number}
+      </span>
+      <span className={`text-[10px] px-1 py-0.5 rounded font-mono flex-shrink-0 ${posCls}`}>
+        {player.pos}
+      </span>
       <span className="text-xs text-zinc-400 truncate">{player.name}</span>
     </Link>
   );
 }
 
-// ---- Pitch markings overlay ----
+// ---- Pitch markings (rendered in background layer) ----
 function PitchMarkings() {
   return (
     <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute inset-3 border border-white/10" />
-      <div className="absolute top-1/2 left-3 right-3 h-px bg-white/15" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border border-white/15" />
+      <div className="absolute inset-4 border border-white/10" />
+      <div className="absolute top-1/2 left-4 right-4 h-px bg-white/15" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border border-white/15" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/25" />
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-14 border-x border-b border-white/10" />
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-36 h-14 border-x border-t border-white/10" />
+      {/* Away penalty area */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-40 h-16 border-x border-b border-white/10" />
+      {/* Home penalty area */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-40 h-16 border-x border-t border-white/10" />
     </div>
   );
 }
 
 // ---- Main export ----
 export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
-  // hovered: set by mouse enter/leave (desktop hover)
-  // pinned: set by click (mobile tap or persistent selection)
-  // display priority: hovered > pinned
   const [hovered, setHovered] = useState<SelectedEntry | null>(null);
-  const [pinned, setPinned] = useState<SelectedEntry | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const homeFormation = formations.find((f) => f.team.id === homeTeamId);
   const awayFormation = formations.find((f) => f.team.id !== homeTeamId);
   if (!homeFormation || !awayFormation) return null;
 
-  // Build data maps keyed by player id (stats + photo)
   const homeMap = new Map<number, PlayerData>();
   const awayMap = new Map<number, PlayerData>();
   for (const lineup of lineups) {
@@ -285,7 +319,7 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
   const awayOrder = Array.from(awayRows.keys()).sort((a, b) => a - b);
   const homeOrder = Array.from(homeRows.keys()).sort((a, b) => b - a);
 
-  const displayed = hovered ?? pinned;
+  const displayed = hovered;
 
   const handleEnter = (player: MergedPlayer, color: "home" | "away") => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
@@ -296,33 +330,30 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
     leaveTimer.current = setTimeout(() => setHovered(null), 150);
   };
 
-  const handleClick = (player: MergedPlayer, color: "home" | "away") => {
-    setPinned((prev) => (prev?.player.id === player.id ? null : { player, color }));
-  };
-
   const renderRows = (
     order: number[],
     rows: Map<number, MergedPlayer[]>,
-    color: "home" | "away"
+    color: "home" | "away",
+    tooltipDir: "up" | "down"
   ) =>
     order.map((rowNum) => (
-      <div key={rowNum} className="flex justify-center items-center gap-1 sm:gap-4">
+      <div key={rowNum} className="flex justify-evenly items-center w-full">
         {rows.get(rowNum)!.map((player) => (
           <PlayerToken
             key={player.id}
             player={player}
             color={color}
+            tooltipDir={tooltipDir}
             isSelected={displayed?.player.id === player.id}
             onEnter={() => handleEnter(player, color)}
             onLeave={handleLeave}
-            onClick={() => handleClick(player, color)}
           />
         ))}
       </div>
     ));
 
   return (
-    <div className="space-y-3" onClick={() => setPinned(null)}>
+    <div className="space-y-3">
       {/* Formation labels */}
       <div className="flex justify-between items-center text-xs">
         <div className="flex items-center gap-1.5">
@@ -337,33 +368,36 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
         </div>
       </div>
 
-      {/* Pitch */}
-      <div
-        className="relative rounded-2xl overflow-hidden border border-zinc-800"
-        style={{
-          background:
-            "repeating-linear-gradient(to bottom, #0f3d1f 0px, #0f3d1f 44px, #0d3519 44px, #0d3519 88px)",
-          minHeight: "540px",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <PitchMarkings />
-
-        {/* Away half (top) */}
-        <div className="absolute top-0 left-0 right-0 h-1/2 flex flex-col justify-around px-4 pt-4 pb-2 gap-2 z-10">
-          {renderRows(awayOrder, awayRows, "away")}
+      {/*
+        Two-layer pitch:
+        1. Background layer — overflow:hidden for stripes + border-radius
+        2. Player layer    — no overflow restriction, so tooltips can float freely
+      */}
+      <div className="relative" style={{ minHeight: "720px" }} onClick={(e) => e.stopPropagation()}>
+        {/* Background layer */}
+        <div
+          className="absolute inset-0 rounded-2xl overflow-hidden border border-zinc-800"
+          style={{
+            background:
+              "repeating-linear-gradient(to bottom, #0f3d1f 0px, #0f3d1f 44px, #0d3519 44px, #0d3519 88px)",
+          }}
+        >
+          <PitchMarkings />
         </div>
 
-        {/* Home half (bottom) */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 flex flex-col justify-around px-4 pt-2 pb-4 gap-2 z-10">
-          {renderRows(homeOrder, homeRows, "home")}
+        {/* Player layer (overflow visible) */}
+        <div className="absolute inset-0">
+          {/* Away half (top) — tooltip points downward toward center */}
+          <div className="absolute top-0 left-0 right-0 h-1/2 flex flex-col justify-around px-3 pt-6 pb-3">
+            {renderRows(awayOrder, awayRows, "away", "down")}
+          </div>
+
+          {/* Home half (bottom) — tooltip points upward toward center */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/2 flex flex-col justify-around px-3 pt-3 pb-6">
+            {renderRows(homeOrder, homeRows, "home", "up")}
+          </div>
         </div>
       </div>
-
-      {/* Stats panel: shown on hover or click */}
-      {displayed && (
-        <PlayerPanel player={displayed.player} color={displayed.color} />
-      )}
 
       {/* Substitutes */}
       {(homeSubs.length > 0 || awaySubs.length > 0) && (
@@ -373,10 +407,14 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
           </h3>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             <div className="space-y-1.5">
-              {homeSubs.map((p) => <SubRow key={p.id} player={p} color="home" />)}
+              {homeSubs.map((p) => (
+                <SubRow key={p.id} player={p} color="home" />
+              ))}
             </div>
             <div className="space-y-1.5">
-              {awaySubs.map((p) => <SubRow key={p.id} player={p} color="away" />)}
+              {awaySubs.map((p) => (
+                <SubRow key={p.id} player={p} color="away" />
+              ))}
             </div>
           </div>
         </div>

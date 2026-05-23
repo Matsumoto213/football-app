@@ -42,7 +42,7 @@ function StatBar({ item }: { item: FixtureStatItem }) {
 // ---- Lineup table ----
 function LineupSection({ team }: { team: FixtureTeamStats }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+    <div className="bg-zinc-800 border border-zinc-700/60 rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800/60">
         {team.team.logo && (
           <Image src={team.team.logo} alt={team.team.name} width={20} height={20} className="object-contain" />
@@ -144,7 +144,7 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
       </Link>
 
       {/* Score card */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="bg-zinc-800 border border-zinc-700/60 rounded-2xl p-6">
         {/* League + status */}
         <div className="flex items-center justify-center gap-2 mb-6">
           {fixture.league.logo && (
@@ -159,7 +159,9 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
           {/* Home */}
           <div className="flex-1 flex flex-col items-center gap-2">
             {fixture.homeTeam.logo && (
-              <Image src={fixture.homeTeam.logo} alt={fixture.homeTeam.name} width={56} height={56} className="object-contain" />
+              <span className="bg-white rounded-xl p-2 inline-flex">
+                <Image src={fixture.homeTeam.logo} alt={fixture.homeTeam.name} width={52} height={52} className="object-contain" />
+              </span>
             )}
             <span className="text-sm font-semibold text-zinc-200 text-center leading-snug">
               {fixture.homeTeam.name}
@@ -168,7 +170,7 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
 
           {/* Score */}
           <div className="flex flex-col items-center gap-1 min-w-[80px]">
-            <div className="text-4xl font-black font-mono text-zinc-50 tracking-tight">
+            <div className="text-4xl font-black tabular-nums text-zinc-50 tracking-tight">
               {showScore
                 ? `${homeScore ?? "?"}–${awayScore ?? "?"}`
                 : <span className="text-2xl text-zinc-500">vs</span>}
@@ -179,7 +181,9 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
           {/* Away */}
           <div className="flex-1 flex flex-col items-center gap-2">
             {fixture.awayTeam.logo && (
-              <Image src={fixture.awayTeam.logo} alt={fixture.awayTeam.name} width={56} height={56} className="object-contain" />
+              <span className="bg-white rounded-xl p-2 inline-flex">
+                <Image src={fixture.awayTeam.logo} alt={fixture.awayTeam.name} width={52} height={52} className="object-contain" />
+              </span>
             )}
             <span className="text-sm font-semibold text-zinc-200 text-center leading-snug">
               {fixture.awayTeam.name}
@@ -202,7 +206,7 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
 
       {/* Match stats */}
       {fixtureStats && fixtureStats.stats.length > 0 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+        <div className="bg-zinc-800 border border-zinc-700/60 rounded-2xl p-5">
           <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
             試合スタッツ
           </h2>
@@ -221,6 +225,7 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
             出場選手
           </h2>
           <PitchView
+            fixtureId={fixtureId}
             homeTeamId={fixture.homeTeam.id}
             formations={formations}
             lineups={lineups}

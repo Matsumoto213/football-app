@@ -23,7 +23,7 @@ const LEAGUES = [
 
 function SkeletonCard() {
   return (
-    <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl p-3 animate-pulse">
+    <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 animate-pulse">
       <div className="w-9 h-9 bg-zinc-800 rounded-lg flex-shrink-0" />
       <div className="flex-1 space-y-1.5">
         <div className="h-3.5 bg-zinc-800 rounded w-28" />
@@ -40,12 +40,14 @@ function TeamCard({ team, isFavorite, onToggle }: {
   onToggle: (id: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-zinc-700 transition-colors group">
+    <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 hover:border-zinc-700 transition-colors group">
       <Link href={`/teams/${team.id}`} className="flex items-center gap-3 flex-1 min-w-0">
         {team.logo ? (
-          <Image src={team.logo} alt={team.name} width={36} height={36} className="object-contain flex-shrink-0" />
+          <span className="flex-shrink-0 bg-white rounded-lg p-1 inline-flex">
+            <Image src={team.logo} alt={team.name} width={32} height={32} className="object-contain" />
+          </span>
         ) : (
-          <div className="w-9 h-9 bg-zinc-800 rounded-lg flex-shrink-0" />
+          <div className="w-9 h-9 bg-zinc-700 rounded-lg flex-shrink-0" />
         )}
         <div className="min-w-0">
           <p className="text-sm font-medium text-zinc-100 truncate">{team.name}</p>
@@ -133,7 +135,7 @@ export default function TopPage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 selectedLeagueId === league.id
                   ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40"
-                  : "bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-600 hover:text-zinc-100"
+                  : "bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:border-zinc-600 hover:text-zinc-100"
               }`}
             >
               <span>{league.flag}</span>

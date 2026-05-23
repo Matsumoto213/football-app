@@ -4,7 +4,7 @@ import { transformFixture, type ApiFixtureEntry } from "../transformers/fixtureT
 import { ok, badRequest, serviceUnavailable, internalError } from "../utils/response";
 import type { Fixture } from "../types/fixture";
 
-const VALID_TYPES = ["past", "upcoming", "recent"] as const;
+const VALID_TYPES = ["past", "upcoming", "recent", "all"] as const;
 type FixtureType = (typeof VALID_TYPES)[number];
 
 // 無料プランで利用可能な最新シーズン（2022〜2024）
@@ -31,11 +31,14 @@ function filterAndSort(fixtures: Fixture[], type: FixtureType): Fixture[] {
         .slice(0, 10);
 
     case "recent":
-      // 今日に近い順にソートして前後を取り、最終的に日付昇順で返す
+      // 今日に近い順にソートして前後を取り、最終的に日付降順（最新が先頭）で返す
       return fixtures
         .sort((a, b) => Math.abs(new Date(a.date).getTime() - now) - Math.abs(new Date(b.date).getTime() - now))
         .slice(0, 10)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    case "all":
+      return fixtures.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 }
 

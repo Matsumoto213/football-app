@@ -14,8 +14,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja" className="h-full">
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
-        <header className="border-b border-zinc-800 bg-zinc-900">
+      <body className="min-h-full flex flex-col bg-zinc-900 text-zinc-50">
+        <header className="border-b border-zinc-700/60 bg-zinc-800">
           <div className="max-w-3xl mx-auto px-4 h-14 flex items-center">
             <Link
               href="/"

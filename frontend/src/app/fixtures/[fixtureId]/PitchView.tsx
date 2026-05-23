@@ -11,6 +11,7 @@ type MergedPlayer = FormationPlayer & { stats?: PlayerStats; photo?: string };
 type SelectedEntry = { player: MergedPlayer; color: "home" | "away" };
 
 export interface PitchViewProps {
+  fixtureId: string | number;
   homeTeamId: number;
   formations: TeamFormation[];
   lineups: FixtureTeamStats[];
@@ -138,7 +139,7 @@ function PlayerTooltip({
       </div>
 
       {/* Link hint */}
-      <p className="mt-2 text-[9px] text-zinc-600 text-right">タップで選手ページへ →</p>
+      <p className="mt-2 text-[9px] text-zinc-600 text-right">タップで試合スタッツへ →</p>
     </div>
   );
 }
@@ -168,6 +169,7 @@ function PlayerToken({
   isSelected,
   onEnter,
   onLeave,
+  fixtureId,
 }: {
   player: MergedPlayer;
   color: "home" | "away";
@@ -175,6 +177,7 @@ function PlayerToken({
   isSelected: boolean;
   onEnter: () => void;
   onLeave: () => void;
+  fixtureId: string | number;
 }) {
   const hasGoal = (player.stats?.goals ?? 0) > 0;
   const hasYellow = (player.stats?.yellowCards ?? 0) > 0;
@@ -187,7 +190,7 @@ function PlayerToken({
 
   return (
     <Link
-      href={`/players/${player.id}`}
+      href={`/fixtures/${fixtureId}/players/${player.id}`}
       className="group relative flex flex-col items-center gap-0.5"
       style={{ zIndex: isSelected ? 50 : 1 }}
       onMouseEnter={onEnter}
@@ -250,12 +253,12 @@ function PlayerToken({
 }
 
 // ---- Sub list row ----
-function SubRow({ player, color }: { player: MergedPlayer; color: "home" | "away" }) {
+function SubRow({ player, color, fixtureId }: { player: MergedPlayer; color: "home" | "away"; fixtureId: string | number }) {
   const posCls =
     color === "home" ? "bg-emerald-950 text-emerald-600" : "bg-blue-950 text-blue-600";
   return (
     <Link
-      href={`/players/${player.id}`}
+      href={`/fixtures/${fixtureId}/players/${player.id}`}
       className="flex items-center gap-2 hover:text-emerald-400 transition-colors"
     >
       <span className="text-xs text-zinc-600 font-mono w-4 text-right flex-shrink-0">
@@ -286,7 +289,7 @@ function PitchMarkings() {
 }
 
 // ---- Main export ----
-export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
+export function PitchView({ fixtureId, homeTeamId, formations, lineups }: PitchViewProps) {
   const [hovered, setHovered] = useState<SelectedEntry | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -347,6 +350,7 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
             isSelected={displayed?.player.id === player.id}
             onEnter={() => handleEnter(player, color)}
             onLeave={handleLeave}
+            fixtureId={fixtureId}
           />
         ))}
       </div>
@@ -408,12 +412,12 @@ export function PitchView({ homeTeamId, formations, lineups }: PitchViewProps) {
           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             <div className="space-y-1.5">
               {homeSubs.map((p) => (
-                <SubRow key={p.id} player={p} color="home" />
+                <SubRow key={p.id} player={p} color="home" fixtureId={fixtureId} />
               ))}
             </div>
             <div className="space-y-1.5">
               {awaySubs.map((p) => (
-                <SubRow key={p.id} player={p} color="away" />
+                <SubRow key={p.id} player={p} color="away" fixtureId={fixtureId} />
               ))}
             </div>
           </div>

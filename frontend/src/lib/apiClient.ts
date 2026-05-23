@@ -35,7 +35,7 @@ export function getTeam(teamId: number | string): Promise<Team> {
 
 export function getFixtures(
   teamId: number | string,
-  type: "past" | "upcoming" | "recent"
+  type: "past" | "upcoming" | "recent" | "all"
 ): Promise<Fixture[]> {
   return apiFetch(`/teams/${teamId}/fixtures?type=${type}`, {
     cache: "no-store",

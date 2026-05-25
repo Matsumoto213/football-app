@@ -15,6 +15,7 @@ import { handler as getFixtureStats } from "./handlers/getFixtureStats";
 import { handler as getFixtureFormation } from "./handlers/getFixtureFormation";
 import { handler as getPlayer } from "./handlers/getPlayer";
 import { handler as getPlayerStats } from "./handlers/getPlayerStats";
+import { handler as getPlayerFixtures } from "./handlers/getPlayerFixtures";
 import { handler as getLeagueTeams } from "./handlers/getLeagueTeams";
 
 type Handler = (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult | void>;
@@ -44,6 +45,7 @@ const routes: Route[] = [
   route("GET", "/fixtures/{fixtureId}/stats", getFixtureStats as Handler),
   route("GET", "/fixtures/{fixtureId}", getFixtureDetail as Handler),
   route("GET", "/players/{playerId}/stats", getPlayerStats as Handler),
+  route("GET", "/players/{playerId}/fixtures", getPlayerFixtures as Handler),
   route("GET", "/players/{playerId}", getPlayer as Handler),
   route("GET", "/leagues/{leagueId}/teams", getLeagueTeams as Handler),
 ];

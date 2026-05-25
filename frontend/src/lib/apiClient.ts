@@ -68,6 +68,14 @@ export function getFixtureFormation(
   return apiFetch(`/fixtures/${fixtureId}/formation`);
 }
 
+export function getPlayerFixtures(
+  playerId: number | string,
+  season?: number | string
+): Promise<Fixture[]> {
+  const qs = season ? `?season=${season}` : "";
+  return apiFetch(`/players/${playerId}/fixtures${qs}`, { cache: "no-store" });
+}
+
 export function getPlayer(
   playerId: number | string,
   season?: number | string

@@ -172,7 +172,7 @@ export default async function FixturePage({ params }: { params: Promise<{ fixtur
           <div className="flex flex-col items-center gap-1 min-w-[80px]">
             <div className="text-4xl font-black tabular-nums text-zinc-50 tracking-tight">
               {showScore
-                ? `${homeScore ?? "?"}–${awayScore ?? "?"}`
+                ? `${homeScore ?? "?"} – ${awayScore ?? "?"}`
                 : <span className="text-2xl text-zinc-500">vs</span>}
             </div>
             <span className="text-xs text-zinc-600">{date}</span>

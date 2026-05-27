@@ -4,6 +4,14 @@
 
 お気に入りのチームを登録し、試合結果・過去試合・選手スタッツを確認できる。
 
+### 主な機能
+
+- **ホーム**: リーグ別チーム一覧、お気に入りチーム登録
+- **チーム詳細**: 所属リーグ別の動的タブで試合一覧表示、選手一覧
+- **試合詳細**: スコア・試合スタッツ・フォーメーション・ピッチビュー
+- **試合内選手スタッツ**: ピッチ上の選手をクリック → 評価・ゴール・アシスト等の個人成績
+- **選手ページ**: シーズンスタッツ / 直近の試合 タブ切り替え
+
 ---
 
 ## 技術スタック
@@ -99,7 +107,7 @@ npm run dev
 |---|---|---|---|
 | GET | `/teams/search` | チーム検索 | `q`（3文字以上） |
 | GET | `/teams/{teamId}` | チーム基本情報 | - |
-| GET | `/teams/{teamId}/fixtures` | 試合一覧 | `type=past\|upcoming\|recent` |
+| GET | `/teams/{teamId}/fixtures` | 試合一覧 | `type=past\|upcoming\|recent\|all` |
 | GET | `/teams/{teamId}/players` | チーム内選手一覧 | - |
 | GET | `/leagues/{leagueId}/teams` | リーグのチーム一覧 | `season`（任意） |
 
@@ -118,6 +126,7 @@ npm run dev
 |---|---|---|---|
 | GET | `/players/{playerId}` | 選手プロフィール | `season`（任意、省略時は自動判定） |
 | GET | `/players/{playerId}/stats` | 選手シーズンスタッツ | `season`（任意、省略時は自動判定） |
+| GET | `/players/{playerId}/fixtures` | 選手の直近試合一覧（完了試合のみ） | `season`（任意） |
 
 ### レスポンス形式
 
@@ -161,6 +170,12 @@ curl "http://localhost:3001/players/285?season=2024"
 
 # 選手シーズンスタッツ
 curl "http://localhost:3001/players/285/stats"
+
+# 選手の直近試合一覧
+curl "http://localhost:3001/players/285/fixtures"
+
+# チームの全試合（リーグ別タブ用）
+curl "http://localhost:3001/teams/42/fixtures?type=all"
 ```
 
 ---

@@ -23,13 +23,13 @@ const LEAGUES = [
 
 function SkeletonCard() {
   return (
-    <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 animate-pulse">
-      <div className="w-9 h-9 bg-zinc-800 rounded-lg flex-shrink-0" />
+    <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-md p-3 animate-pulse">
+      <div className="w-9 h-9 bg-stone-200 rounded flex-shrink-0" />
       <div className="flex-1 space-y-1.5">
-        <div className="h-3.5 bg-zinc-800 rounded w-28" />
-        <div className="h-3 bg-zinc-800 rounded w-16" />
+        <div className="h-3.5 bg-stone-200 rounded w-28" />
+        <div className="h-3 bg-stone-200 rounded w-16" />
       </div>
-      <div className="w-5 h-5 bg-zinc-800 rounded" />
+      <div className="w-5 h-5 bg-stone-200 rounded" />
     </div>
   );
 }
@@ -40,24 +40,24 @@ function TeamCard({ team, isFavorite, onToggle }: {
   onToggle: (id: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 hover:border-zinc-700 transition-colors group">
+    <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-md p-3 hover:border-stone-300 hover:shadow-sm transition-all group">
       <Link href={`/teams/${team.id}`} className="flex items-center gap-3 flex-1 min-w-0">
         {team.logo ? (
-          <span className="flex-shrink-0 bg-white rounded-lg p-1 inline-flex">
+          <span className="flex-shrink-0 bg-stone-50 border border-stone-100 rounded p-1 inline-flex">
             <Image src={team.logo} alt={team.name} width={32} height={32} className="object-contain" />
           </span>
         ) : (
-          <div className="w-9 h-9 bg-zinc-700 rounded-lg flex-shrink-0" />
+          <div className="w-9 h-9 bg-stone-100 rounded flex-shrink-0" />
         )}
         <div className="min-w-0">
-          <p className="text-sm font-medium text-zinc-100 truncate">{team.name}</p>
-          <p className="text-xs text-zinc-500">{team.country}</p>
+          <p className="text-sm font-medium text-stone-800 truncate">{team.name}</p>
+          <p className="text-xs text-stone-400">{team.country}</p>
         </div>
       </Link>
       <button
         onClick={() => onToggle(team.id)}
         className={`text-lg flex-shrink-0 transition-colors ${
-          isFavorite ? "text-yellow-400" : "text-zinc-700 group-hover:text-zinc-500 hover:!text-yellow-400"
+          isFavorite ? "text-yellow-500" : "text-stone-200 group-hover:text-stone-300 hover:!text-yellow-400"
         }`}
         aria-label={isFavorite ? "お気に入り解除" : "お気に入り登録"}
       >
@@ -108,10 +108,9 @@ export default function TopPage() {
 
   return (
     <div className="space-y-8">
-      {/* お気に入りチーム */}
       {favoriteTeams.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold text-yellow-500/80 uppercase tracking-widest mb-3">
+          <h2 className="text-xs font-semibold text-yellow-600 uppercase tracking-wide mb-3">
             ★ お気に入り
           </h2>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -122,9 +121,8 @@ export default function TopPage() {
         </section>
       )}
 
-      {/* リーグ選択 */}
       <section>
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+        <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">
           リーグからチームを探す
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -132,10 +130,10 @@ export default function TopPage() {
             <button
               key={league.id}
               onClick={() => setSelectedLeagueId(selectedLeagueId === league.id ? null : league.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all border ${
                 selectedLeagueId === league.id
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40"
-                  : "bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:border-zinc-600 hover:text-zinc-100"
+                  ? "bg-green-600 text-white border-green-600 shadow-sm"
+                  : "bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-800"
               }`}
             >
               <span>{league.flag}</span>
@@ -145,7 +143,6 @@ export default function TopPage() {
         </div>
       </section>
 
-      {/* チーム一覧 */}
       {selectedLeagueId !== null && (
         <section>
           {loadingTeams ? (
@@ -153,7 +150,7 @@ export default function TopPage() {
               {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : leagueTeams.length === 0 ? (
-            <p className="text-zinc-600 text-sm">チームデータがありません</p>
+            <p className="text-stone-400 text-sm">チームデータがありません</p>
           ) : (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {leagueTeams.map((team) => (
@@ -170,7 +167,7 @@ export default function TopPage() {
       )}
 
       {selectedLeagueId === null && favoriteTeams.length === 0 && (
-        <p className="text-zinc-700 text-sm mt-2">
+        <p className="text-stone-400 text-sm mt-2">
           リーグを選択してチームを探し、★ でお気に入り登録できます
         </p>
       )}

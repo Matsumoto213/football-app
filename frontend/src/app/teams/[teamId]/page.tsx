@@ -12,53 +12,50 @@ import type { League } from "@/types/team";
 
 const repo = new LocalStorageTeamFavoriteRepository();
 
-// ---- Status badge ----
 const STATUS_CONFIG: Record<FixtureStatus, { label: string; cls: string }> = {
-  finished:  { label: "FT",   cls: "bg-zinc-800 text-zinc-400" },
-  live:      { label: "LIVE", cls: "bg-red-950 text-red-400 animate-pulse" },
-  scheduled: { label: "予定", cls: "bg-zinc-800 text-zinc-500" },
-  postponed: { label: "延期", cls: "bg-yellow-950 text-yellow-400" },
+  finished:  { label: "FT",   cls: "bg-stone-100 text-stone-500" },
+  live:      { label: "LIVE", cls: "bg-red-50 text-red-600 font-semibold" },
+  scheduled: { label: "予定", cls: "bg-stone-100 text-stone-400" },
+  postponed: { label: "延期", cls: "bg-amber-50 text-amber-600" },
 };
 
-// ---- Position badge ----
 const positionCls = (pos?: string) => {
-  if (!pos) return "bg-zinc-800 text-zinc-500";
-  if (pos.includes("Goalkeeper")) return "bg-yellow-950 text-yellow-400";
-  if (pos.includes("Defender"))   return "bg-blue-950 text-blue-400";
-  if (pos.includes("Midfielder")) return "bg-emerald-950 text-emerald-400";
-  if (pos.includes("Attacker"))   return "bg-red-950 text-red-400";
-  return "bg-zinc-800 text-zinc-500";
+  if (!pos) return "bg-stone-100 text-stone-500";
+  if (pos.includes("Goalkeeper")) return "bg-amber-50 text-amber-700";
+  if (pos.includes("Defender"))   return "bg-blue-50 text-blue-700";
+  if (pos.includes("Midfielder")) return "bg-green-50 text-green-700";
+  if (pos.includes("Attacker"))   return "bg-red-50 text-red-700";
+  return "bg-stone-100 text-stone-500";
 };
 
-// ---- Skeletons ----
 function HeaderSkeleton() {
   return (
-    <div className="bg-zinc-800 border border-zinc-700/60 rounded-2xl p-5 animate-pulse">
+    <div className="bg-white border border-stone-200 rounded-lg p-5 animate-pulse">
       <div className="flex items-start gap-4">
-        <div className="w-16 h-16 bg-zinc-800 rounded-xl flex-shrink-0" />
+        <div className="w-16 h-16 bg-stone-200 rounded flex-shrink-0" />
         <div className="flex-1 space-y-2 pt-1">
-          <div className="h-5 bg-zinc-800 rounded w-36" />
-          <div className="h-4 bg-zinc-800 rounded w-24" />
-          <div className="h-3 bg-zinc-800 rounded w-40" />
+          <div className="h-5 bg-stone-200 rounded w-36" />
+          <div className="h-4 bg-stone-200 rounded w-24" />
+          <div className="h-3 bg-stone-200 rounded w-40" />
         </div>
       </div>
     </div>
   );
 }
+
 function RowSkeleton() {
   return (
-    <div className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 animate-pulse">
-      <div className="w-8 h-8 bg-zinc-800 rounded-lg flex-shrink-0" />
+    <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-md p-3 animate-pulse">
+      <div className="w-8 h-8 bg-stone-200 rounded flex-shrink-0" />
       <div className="flex-1 space-y-1.5">
-        <div className="h-3.5 bg-zinc-800 rounded w-40" />
-        <div className="h-3 bg-zinc-800 rounded w-20" />
+        <div className="h-3.5 bg-stone-200 rounded w-40" />
+        <div className="h-3 bg-stone-200 rounded w-20" />
       </div>
-      <div className="w-12 h-5 bg-zinc-800 rounded" />
+      <div className="w-12 h-5 bg-stone-200 rounded" />
     </div>
   );
 }
 
-// ---- Fixture card ----
 function FixtureCard({ fixture, teamId }: { fixture: Fixture; teamId: number }) {
   const { label, cls } = STATUS_CONFIG[fixture.status];
   const date = new Date(fixture.date).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
@@ -68,55 +65,51 @@ function FixtureCard({ fixture, teamId }: { fixture: Fixture; teamId: number }) 
   const opScore = isHome ? fixture.score.away : fixture.score.home;
 
   const resultCls =
-    fixture.status !== "finished" ? "text-zinc-400"
-    : myScore != null && opScore != null && myScore > opScore ? "text-emerald-400"
-    : myScore != null && opScore != null && myScore < opScore ? "text-red-400"
-    : "text-zinc-400";
+    fixture.status !== "finished" ? "text-stone-500"
+    : myScore != null && opScore != null && myScore > opScore ? "text-green-700"
+    : myScore != null && opScore != null && myScore < opScore ? "text-red-600"
+    : "text-stone-500";
 
   return (
     <Link
       href={`/fixtures/${fixture.id}`}
-      className="flex items-center gap-2 bg-zinc-800 border border-zinc-700/60 rounded-xl px-3 py-2.5 hover:border-zinc-700 transition-colors group"
+      className="flex items-center gap-2 bg-white border border-stone-200 rounded-md px-3 py-2.5 hover:border-stone-300 hover:shadow-sm transition-all"
     >
-      <span className="text-xs text-zinc-600 w-10 flex-shrink-0">{date}</span>
+      <span className="text-xs text-stone-400 w-10 flex-shrink-0">{date}</span>
 
-      {/* Teams */}
       <div className="flex items-center gap-1.5 flex-1 min-w-0">
         {opponent.logo && (
-          <span className="flex-shrink-0 bg-white rounded p-0.5 inline-flex">
+          <span className="flex-shrink-0 bg-stone-50 border border-stone-100 rounded p-0.5 inline-flex">
             <Image src={opponent.logo} alt={opponent.name} width={18} height={18} className="object-contain" />
           </span>
         )}
-        <span className="text-sm text-zinc-300 truncate">vs {opponent.name}</span>
+        <span className="text-sm text-stone-700 truncate">vs {opponent.name}</span>
       </div>
 
-      {/* Score */}
       {fixture.status === "finished" && myScore != null && opScore != null && (
         <span className={`text-sm font-bold tabular-nums flex-shrink-0 ${resultCls}`}>
           {myScore} – {opScore}
         </span>
       )}
 
-      {/* Status */}
       <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${cls}`}>{label}</span>
     </Link>
   );
 }
 
-// ---- Player card ----
 function PlayerCard({ player }: { player: Player }) {
   return (
     <Link
       href={`/players/${player.id}`}
-      className="flex items-center gap-3 bg-zinc-800 border border-zinc-700/60 rounded-xl p-3 hover:border-zinc-700 transition-colors"
+      className="flex items-center gap-3 bg-white border border-stone-200 rounded-md p-3 hover:border-stone-300 hover:shadow-sm transition-all"
     >
       {player.photo ? (
-        <Image src={player.photo} alt={player.name} width={36} height={36} className="rounded-full object-cover flex-shrink-0 bg-zinc-800" />
+        <Image src={player.photo} alt={player.name} width={36} height={36} className="rounded-full object-cover flex-shrink-0" />
       ) : (
-        <div className="w-9 h-9 rounded-full bg-zinc-800 flex-shrink-0" />
+        <div className="w-9 h-9 rounded-full bg-stone-100 flex-shrink-0" />
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-zinc-200 truncate">{player.name}</p>
+        <p className="text-sm font-medium text-stone-800 truncate">{player.name}</p>
         {player.position && (
           <span className={`inline-block text-xs px-1.5 py-0.5 rounded mt-0.5 ${positionCls(player.position)}`}>
             {player.position}
@@ -124,7 +117,7 @@ function PlayerCard({ player }: { player: Player }) {
         )}
       </div>
       {player.number != null && (
-        <span className="text-xs text-zinc-600 font-mono flex-shrink-0">#{player.number}</span>
+        <span className="text-xs text-stone-400 font-mono flex-shrink-0">#{player.number}</span>
       )}
     </Link>
   );
@@ -178,10 +171,7 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
     try {
       const data = await getFixtures(id, "all");
       setAllFixtures(data);
-      // auto-select the first league
-      if (data.length > 0) {
-        setSelectedLeagueId(data[0].league.id);
-      }
+      if (data.length > 0) setSelectedLeagueId(data[0].league.id);
     } catch {}
     finally { setLoadingFixtures(false); }
   }, [id]);
@@ -205,44 +195,42 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
 
   return (
     <div className="space-y-5">
-      {/* Back */}
-      <Link href="/" className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+      <Link href="/" className="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600 transition-colors">
         ← トップ
       </Link>
 
-      {/* Team header */}
       {loadingTeam ? (
         <HeaderSkeleton />
       ) : !team ? (
-        <p className="text-zinc-500 text-sm">チームが見つかりませんでした</p>
+        <p className="text-stone-500 text-sm">チームが見つかりませんでした</p>
       ) : (
-        <div className="bg-zinc-800 border border-zinc-700/60 rounded-2xl p-5">
+        <div className="bg-white border border-stone-200 rounded-lg shadow-sm p-5">
           <div className="flex items-start gap-4">
             {team.logo ? (
-              <span className="flex-shrink-0 bg-white rounded-xl p-2 inline-flex">
+              <span className="flex-shrink-0 bg-stone-50 border border-stone-100 rounded p-2 inline-flex">
                 <Image src={team.logo} alt={team.name} width={56} height={56} className="object-contain" />
               </span>
             ) : (
-              <div className="w-16 h-16 bg-zinc-700 rounded-xl flex-shrink-0" />
+              <div className="w-16 h-16 bg-stone-100 rounded flex-shrink-0" />
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <h1 className="text-xl font-bold text-zinc-50 leading-tight">{team.name}</h1>
+                <h1 className="text-xl font-bold text-stone-900 leading-tight">{team.name}</h1>
                 <button
                   onClick={toggleFavorite}
                   className={`text-2xl flex-shrink-0 leading-none transition-colors ${
-                    isFavorite ? "text-yellow-400" : "text-zinc-700 hover:text-yellow-400"
+                    isFavorite ? "text-yellow-500" : "text-stone-200 hover:text-yellow-400"
                   }`}
                   aria-label={isFavorite ? "お気に入り解除" : "お気に入り登録"}
                 >
                   {isFavorite ? "★" : "☆"}
                 </button>
               </div>
-              <p className="text-sm text-zinc-400 mt-1">
-                {team.country}{team.founded && <span className="text-zinc-600"> · {team.founded}</span>}
+              <p className="text-sm text-stone-500 mt-1">
+                {team.country}{team.founded && <span className="text-stone-400"> · {team.founded}</span>}
               </p>
               {team.venue && (
-                <p className="text-xs text-zinc-600 mt-1">
+                <p className="text-xs text-stone-400 mt-1">
                   {team.venue.name}
                   {team.venue.capacity && ` · ${team.venue.capacity.toLocaleString()}席`}
                 </p>
@@ -252,14 +240,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-zinc-800 border border-zinc-700/60 rounded-xl p-1">
+      <div className="flex gap-1 bg-stone-100 border border-stone-200 rounded-md p-1">
         {(["fixtures", "players"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
-              tab === t ? "bg-zinc-700 text-zinc-50" : "text-zinc-500 hover:text-zinc-300"
+            className={`flex-1 py-2 text-sm font-medium rounded transition-colors ${
+              tab === t ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700"
             }`}
           >
             {t === "fixtures" ? "試合" : "選手"}
@@ -267,14 +254,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
         ))}
       </div>
 
-      {/* Fixtures */}
       {tab === "fixtures" && (
         <div className="space-y-3">
           {loadingFixtures ? (
             <>
               <div className="flex gap-1.5 flex-wrap">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-7 w-28 bg-zinc-800 rounded-lg animate-pulse" />
+                  <div key={i} className="h-7 w-28 bg-stone-200 rounded animate-pulse" />
                 ))}
               </div>
               <div className="space-y-2">
@@ -282,19 +268,18 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
               </div>
             </>
           ) : leagueGroups.length === 0 ? (
-            <p className="text-zinc-600 text-sm py-4 text-center">試合データがありません</p>
+            <p className="text-stone-400 text-sm py-4 text-center">試合データがありません</p>
           ) : (
             <>
-              {/* League tabs */}
               <div className="flex gap-1.5 flex-wrap">
                 {leagueGroups.map(({ league }) => (
                   <button
                     key={league.id}
                     onClick={() => setSelectedLeagueId(league.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded border transition-colors ${
                       selectedLeagueId === league.id
-                        ? "bg-zinc-700 text-zinc-100"
-                        : "text-zinc-500 hover:text-zinc-300"
+                        ? "bg-green-600 text-white border-green-600"
+                        : "bg-white text-stone-500 border-stone-200 hover:border-stone-300 hover:text-stone-700"
                     }`}
                   >
                     {league.logo && (
@@ -304,7 +289,6 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
                   </button>
                 ))}
               </div>
-              {/* Fixture list */}
               <div className="space-y-2">
                 {displayedFixtures.map((f) => (
                   <FixtureCard key={f.id} fixture={f} teamId={id} />
@@ -315,14 +299,13 @@ export default function TeamPage({ params }: { params: Promise<{ teamId: string 
         </div>
       )}
 
-      {/* Players */}
       {tab === "players" && (
         loadingPlayers ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {Array.from({ length: 8 }).map((_, i) => <RowSkeleton key={i} />)}
           </div>
         ) : players.length === 0 ? (
-          <p className="text-zinc-600 text-sm py-4 text-center">選手データがありません</p>
+          <p className="text-stone-400 text-sm py-4 text-center">選手データがありません</p>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {players.map((p) => <PlayerCard key={p.id} player={p} />)}

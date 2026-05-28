@@ -43,62 +43,85 @@ function groupByRow(players: MergedPlayer[]): Map<number, MergedPlayer[]> {
   return rows;
 }
 
-function PlayerTooltip({ player, dir }: { player: MergedPlayer; dir: "up" | "down" }) {
-  const rating = parseFloat(player.stats?.rating ?? "");
-  const ratingCls = isNaN(rating)
-    ? "text-stone-400"
-    : rating >= 8 ? "text-green-400"
-    : rating >= 7 ? "text-stone-200"
-    : "text-stone-500";
-
-  const positionCls =
-    dir === "up"
-      ? "bottom-full mb-3 left-1/2 -translate-x-1/2"
-      : "top-full mt-3 left-1/2 -translate-x-1/2";
-
+function StatCell({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`absolute z-50 w-44 bg-zinc-950/95 border border-zinc-700 rounded-xl shadow-2xl p-3 pointer-events-none ${positionCls}`}>
-      <span className={`absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-zinc-950 border-zinc-700 rotate-45 ${
-        dir === "up" ? "top-full -translate-y-[7px] border-b border-r" : "bottom-full translate-y-[7px] border-t border-l"
-      }`} />
-      <div className="flex items-center gap-2 mb-2">
-        {player.photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={player.photo} alt={player.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-zinc-800" />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0" />
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-zinc-100 truncate leading-tight">{player.name}</p>
-          <p className="text-[10px] text-zinc-500">#{player.number ?? "—"} · {player.pos}</p>
-        </div>
-        {!isNaN(rating) && (
-          <span className={`text-lg font-black flex-shrink-0 ${ratingCls}`}>{rating.toFixed(1)}</span>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
-        {player.stats?.minutesPlayed != null && <Row label="時間" value={`${player.stats.minutesPlayed}'`} />}
-        {player.stats?.goals != null && (
-          <Row label="ゴール" value={String(player.stats.goals)} cls={player.stats.goals > 0 ? "text-emerald-400 font-bold" : "text-zinc-300"} />
-        )}
-        {player.stats?.assists != null && (
-          <Row label="アシスト" value={String(player.stats.assists)} cls={player.stats.assists > 0 ? "text-blue-400 font-bold" : "text-zinc-300"} />
-        )}
-        {player.stats?.shots != null && <Row label="シュート" value={String(player.stats.shots)} />}
-        {player.stats?.passes != null && <Row label="パス" value={String(player.stats.passes)} />}
-        {(player.stats?.yellowCards ?? 0) > 0 && <Row label="イエロー" value={String(player.stats!.yellowCards)} />}
-        {(player.stats?.redCards ?? 0) > 0 && <Row label="レッド" value={String(player.stats!.redCards)} />}
-      </div>
-      <p className="mt-2 text-[9px] text-zinc-600 text-right">タップで試合スタッツへ →</p>
+    <div className="bg-white px-3 py-2.5">
+      <p className={`text-base font-bold tabular-nums leading-none ${highlight ? "text-green-600" : "text-stone-800"}`}>
+        {value}
+      </p>
+      <p className="text-[11px] text-stone-400 mt-0.5">{label}</p>
     </div>
   );
 }
 
-function Row({ label, value, cls = "text-zinc-300" }: { label: string; value: string; cls?: string }) {
+function PlayerTooltip({ player, dir }: { player: MergedPlayer; dir: "up" | "down" }) {
+  const rating = parseFloat(player.stats?.rating ?? "");
+  const ratingCls = isNaN(rating)
+    ? "text-stone-400"
+    : rating >= 8 ? "text-green-600"
+    : rating >= 7 ? "text-stone-700"
+    : "text-stone-400";
+
+  const positionCls =
+    dir === "up"
+      ? "bottom-full mb-4 left-1/2 -translate-x-1/2"
+      : "top-full mt-4 left-1/2 -translate-x-1/2";
+
+  const statCells: { label: string; value: string; highlight?: boolean }[] = [];
+  if (player.stats?.minutesPlayed != null) statCells.push({ label: "出場時間", value: `${player.stats.minutesPlayed}'` });
+  if (player.stats?.goals != null) statCells.push({ label: "ゴール", value: String(player.stats.goals), highlight: player.stats.goals > 0 });
+  if (player.stats?.assists != null) statCells.push({ label: "アシスト", value: String(player.stats.assists), highlight: player.stats.assists > 0 });
+  if (player.stats?.shots != null) statCells.push({ label: "シュート", value: String(player.stats.shots) });
+  if (player.stats?.passes != null) statCells.push({ label: "パス", value: String(player.stats.passes) });
+  if ((player.stats?.yellowCards ?? 0) > 0) statCells.push({ label: "イエロー", value: String(player.stats!.yellowCards) });
+  if ((player.stats?.redCards ?? 0) > 0) statCells.push({ label: "レッド", value: String(player.stats!.redCards) });
+
   return (
-    <div className="flex justify-between">
-      <span className="text-zinc-500">{label}</span>
-      <span className={cls}>{value}</span>
+    <div
+      className={`absolute z-50 w-60 bg-white border border-stone-200 rounded-lg overflow-hidden pointer-events-none ${positionCls}`}
+      style={{ boxShadow: "0 4px 8px 2px rgba(3,3,2,0.12)" }}
+    >
+      {/* Arrow */}
+      <span
+        className={`absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-stone-200 rotate-45 ${
+          dir === "up"
+            ? "top-full -translate-y-[6px] border-b border-r"
+            : "bottom-full translate-y-[6px] border-t border-l"
+        }`}
+      />
+
+      {/* Header */}
+      <div className="flex items-center gap-3 px-3 py-3 border-b border-stone-100">
+        {player.photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={player.photo} alt={player.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0 bg-stone-100" />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-stone-100 flex-shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-stone-900 truncate leading-tight">{player.name}</p>
+          <p className="text-xs text-stone-400 mt-0.5">#{player.number ?? "—"} · {player.pos}</p>
+        </div>
+        {!isNaN(rating) && (
+          <span className={`text-2xl font-black tabular-nums flex-shrink-0 ${ratingCls}`}>
+            {rating.toFixed(1)}
+          </span>
+        )}
+      </div>
+
+      {/* Stats grid */}
+      {statCells.length > 0 && (
+        <div className="grid grid-cols-3 gap-px bg-stone-100">
+          {statCells.map((s) => (
+            <StatCell key={s.label} label={s.label} value={s.value} highlight={s.highlight} />
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="px-3 py-2 border-t border-stone-100">
+        <p className="text-[10px] text-stone-400 text-right">タップで試合スタッツへ →</p>
+      </div>
     </div>
   );
 }

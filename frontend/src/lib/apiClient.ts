@@ -70,10 +70,12 @@ export function getFixtureFormation(
 
 export function getPlayerFixtures(
   playerId: number | string,
+  teamId: number | string,
   season?: number | string
 ): Promise<Fixture[]> {
-  const qs = season ? `?season=${season}` : "";
-  return apiFetch(`/players/${playerId}/fixtures${qs}`, { cache: "no-store" });
+  const params = new URLSearchParams({ teamId: String(teamId) });
+  if (season) params.set("season", String(season));
+  return apiFetch(`/players/${playerId}/fixtures?${params}`, { cache: "no-store" });
 }
 
 export function getPlayer(

@@ -87,15 +87,16 @@ export default function PlayerTabsSection({
   const handleFixturesTab = useCallback(async () => {
     setTab("fixtures");
     if (fixtures !== null) return;
+    if (!teamId) { setFixtures([]); return; }
     setLoading(true);
     try {
-      setFixtures(await getPlayerFixtures(playerId));
+      setFixtures(await getPlayerFixtures(playerId, teamId));
     } catch {
       setFixtures([]);
     } finally {
       setLoading(false);
     }
-  }, [playerId, fixtures]);
+  }, [playerId, teamId, fixtures]);
 
   return (
     <div className="space-y-4">

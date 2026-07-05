@@ -14,6 +14,14 @@
 
 ---
 
+## アーキテクチャ
+
+![Football App Architecture](docs/football-app-architecture.png)
+
+> ソース: [`docs/football-app-architecture.drawio`](docs/football-app-architecture.drawio)
+
+---
+
 ## 技術スタック
 
 | レイヤー | 技術 |
